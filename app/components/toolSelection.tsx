@@ -1,13 +1,15 @@
 'use client'
-import { motion, useTransform } from 'framer-motion'
-import { useToolStore } from '../stores/toolStore'
+import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { useTransform } from 'framer-motion'
 import { useGlobalScroll } from '../hooks/useGlobalScroll'
+import { useToolStore } from '../stores/toolStore'
 
 export default function ToolDescription() {
   const centeredTool = useToolStore((s) => s.centeredTool)
   const handleClick = useToolStore((s) => s.handleClick)
   const [index, setIndex] = useState(0)
+  const [clicked, setClicked] = useState(false)
 
   const scrollYProgress = useGlobalScroll()
   const y = useTransform(scrollYProgress, [0.1, 1], ['0vh', '240vh'])
@@ -33,6 +35,7 @@ export default function ToolDescription() {
         flex items-center justify-center gap-6
       "
     >
+      {/* ◀️ Previous */}
       <button
         onClick={() =>
           setIndex((i) =>
@@ -44,6 +47,7 @@ export default function ToolDescription() {
         &lt;
       </button>
 
+      {/* 🧠 Centered Tool Info */}
       <div className="w-[280px] flex flex-col items-center">
         <div className="text-2xl font-semibold tracking-wide text-black">
           {centeredTool.tool}
@@ -56,19 +60,51 @@ export default function ToolDescription() {
           </div>
         )}
 
-        <button
-          onClick={() => handleClick && handleClick(centeredTool.id)}
-          className="
-            mt-3 px-4 py-1 text-sm font-medium text-black border border-black 
-            rounded-full hover:bg-black hover:text-white 
-            transition-colors duration-200
-          "
-        >
-          Add to workflow
-        </button>
+        {/* ⚡ Sleek Ripple Button */}
+        <div className="relative mt-3">
+          {/* Ripple effect around border */}
+          {!clicked && (
+            <motion.span
+              className="absolute inset-0 rounded-full border border-black/40"
+              style={{
+                scale: 1,
+                opacity: 0.8,
+              }}
+              animate={{
+                scale: [1, 1.4],
+                opacity: [0.8, 0],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: 'easeOut',
+              }}
+            />
+          )}
+
+          <motion.button
+            onClick={() => {
+              setClicked(true)
+              handleClick && handleClick(centeredTool.id)
+            }}
+            whileHover={{
+              scale: 1.05,
+              backgroundColor: '#000',
+              color: '#fff',
+            }}
+            whileTap={{ scale: 0.95 }}
+            className="
+              relative z-10 px-5 py-2 text-sm font-medium border border-black
+              rounded-full text-black bg-white/90 backdrop-blur-sm
+              hover:bg-black hover:text-white transition-all duration-300
+            "
+          >
+            Add to workflow
+          </motion.button>
+        </div>
       </div>
 
-      {/* ▶️ Next function */}
+      {/* ▶️ Next */}
       <button
         onClick={() =>
           setIndex((i) =>

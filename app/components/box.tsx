@@ -3,15 +3,17 @@ import React, { useRef, useEffect, useMemo, useState } from 'react'
 import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { TextureLoader, CanvasTexture } from 'three'
-import { motion } from 'framer-motion'
+import { motion, useTransform } from 'framer-motion'
 import { useScrollPhase } from '../hooks/useScrollPhase'
+
+import { useGlobalScroll } from '../hooks/useGlobalScroll'
 
 // ---------- Texture Preloader ----------
 function usePreloadTextures() {
   const gl = useThree((state) => state.gl)
   useEffect(() => {
     const loader = new TextureLoader(gl.manager)
-    loader.load('/textures/squire.png', () => {})
+    loader.load('/textures/Squire.png', () => {})
   }, [gl])
 }
 function TexturePreloader() {
@@ -60,11 +62,25 @@ function AnimatedBox({
     [radius, angle]
   )
 
-  useFrame((state) => {
+  const [spawnProgress, setSpawnProgress] = useState(0)
+
+  useFrame((state, delta) => {
     if (!ref.current) return
+
     if (!isMerging && !isDone) {
-      ref.current.position.lerp(radiusVec, 0.1)
-      ref.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1)
+      // Ease outward + scale up from small
+      setSpawnProgress((p) => Math.min(p + delta * 1.5, 1))
+      const eased = 1 - Math.pow(1 - spawnProgress, 3) // easeOutCubic
+
+      // Position grows outward
+      const pos = radiusVec.clone().multiplyScalar(eased)
+      ref.current.position.lerp(pos, 0.2)
+
+      // Scale grows from tiny to full size
+      const targetScale = new THREE.Vector3(eased, eased, eased)
+      ref.current.scale.lerp(targetScale, 0.15)
+
+      // Subtle float motion
       ref.current.position.y = Math.sin(state.clock.elapsedTime * 2 + index) * 0.2
     }
   })
@@ -72,7 +88,8 @@ function AnimatedBox({
   return (
     <mesh
       ref={ref}
-      position={radiusVec}
+      position={[0, 0, 0]} // start at center
+      scale={[0.001, 0.001, 0.001]} // start small
       onClick={(e) => {
         e.stopPropagation()
         onClick(id)
@@ -84,6 +101,7 @@ function AnimatedBox({
   )
 }
 
+// ---------- Orbiting Boxes Group ----------
 function OrbitingBoxes({
   collected,
   setCollected,
@@ -121,15 +139,13 @@ function OrbitingBoxes({
       if (collapseStart.current === null)
         collapseStart.current = state.clock.elapsedTime
       const elapsed = state.clock.elapsedTime - collapseStart.current
-      const allCollapsedTime =
-        total * collapseDurationPerBox + 0.6 // rough timing
+      const allCollapsedTime = total * collapseDurationPerBox + 0.6
 
       group.children.forEach((child, i) => {
         const boxDelay = i * collapseDurationPerBox
         const t = Math.min(Math.max(elapsed - boxDelay, 0) / 0.5, 1)
         if (t > 0) {
           const lerpFactor = 1 - Math.pow(1 - t, 3)
-          // move *into* the center cube
           child.position.lerp(new THREE.Vector3(0, 0, 0), lerpFactor * delta * 8)
           child.scale.lerp(new THREE.Vector3(0, 0, 0), lerpFactor * delta * 10)
         }
@@ -182,11 +198,9 @@ function CenterCube({
     ref.current.rotation.x += delta * 0.4
     ref.current.rotation.y += delta * 0.25
 
-    // Fade cube visibility
     const targetOpacity = cubeVisible ? 1 : 0
     mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, delta * 3)
 
-    // Switch texture only after merge done
     mat.map = showTexture ? texture : null
     mat.color.set(showTexture ? '#ffffff' : '#000000')
     mat.needsUpdate = true
@@ -206,29 +220,25 @@ function CenterCube({
   )
 }
 
-// ---------- ThreePane ----------
 export default function ThreePane({
   collected = [],
   onCubeVisibleChange,
 }: {
   collected: { id: string; color: string; tool: string }[]
-      onCubeVisibleChange?: (visible: boolean) => void
-
+  onCubeVisibleChange?: (visible: boolean) => void
 }) {
   const { phase } = useScrollPhase()
+  const scrollYProgress = useGlobalScroll()
   const [showLogo, setShowLogo] = useState(false)
   const [cubeVisible, setCubeVisible] = useState(true)
   const [showTexture, setShowTexture] = useState(false)
 
-  // Called when orbit collapse finishes
-  const handleCollapseDone = () => {
-    setShowTexture(true)
-  }
+  const handleCollapseDone = () => setShowTexture(true)
 
   useEffect(() => {
     if (phase === 'done') {
       setCubeVisible(false)
-      onCubeVisibleChange?.(false)   // 🔔 Notify parent: cube is gone
+      onCubeVisibleChange?.(false)
       const timeout = setTimeout(() => setShowLogo(true), 800)
       return () => clearTimeout(timeout)
     } else {
@@ -236,11 +246,13 @@ export default function ThreePane({
       const timeout = setTimeout(() => {
         setCubeVisible(true)
         setShowTexture(false)
-        onCubeVisibleChange?.(true)  // 🔔 Notify parent: cube is back
+        onCubeVisibleChange?.(true)
       }, 600)
       return () => clearTimeout(timeout)
     }
   }, [phase])
+
+  const textColor = useTransform(scrollYProgress, [0.9, 1], ['#000000', '#ffffff'])
 
   return (
     <div className="w-screen h-screen pointer-events-none relative">
@@ -268,22 +280,35 @@ export default function ThreePane({
         <OrbitControls enableZoom={false} enablePan enableRotate />
       </Canvas>
 
-      {/* Squire logo + wordmark */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: showLogo ? 1 : 0 }}
-        transition={{ duration: 0.8, ease: 'easeInOut' }}
-        className="absolute top-8 left-10 flex items-center gap-3 pointer-events-auto"
-      >
-        <img
-          src="/textures/Squire.png"
-          alt="Squire logo"
-          className="w-10 h-10 object-contain"
-        />
-        <span className="text-4xl font-bold text-black tracking-tight">
-          Squire
-        </span>
-      </motion.div>
+      
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: showLogo ? 1 : 0 }}
+  transition={{ duration: 0.8, ease: 'easeInOut' }}
+  className="absolute top-8 left-10 flex items-center gap-3 pointer-events-auto"
+>
+  <motion.img
+    src="/textures/Squire.png"
+    alt="Squire logo"
+    className="w-10 h-10 object-contain"
+    style={{
+      // Fade to white as scroll approaches hero section (same range as text)
+      filter: useTransform(scrollYProgress, [0.9, 1], [
+        'invert(0) brightness(1)',
+        'invert(1) brightness(2)',
+      ]),
+    }}
+    transition={{ duration: 0.6, ease: 'easeInOut' }}
+  />
+
+  <motion.span
+    className="text-4xl font-bold tracking-tight select-none"
+    style={{ color: textColor }}
+  >
+    Squire
+  </motion.span>
+</motion.div>
     </div>
   )
 }
+
