@@ -4,25 +4,38 @@ import { motion, useTransform } from 'framer-motion'
 import { useToolStore } from '../stores/toolStore'
 import { useGlobalScroll } from '../hooks/useGlobalScroll'
 
-export interface ToolAction {
+// Match your Tool type from the store
+export interface Tool {
   id: string
-  name: string
-  icon: string
-  description?: string
-  action?: () => void
+  tool: string
+  functions: { name: string; time: string }[]
+  time: string
+  iconPath: string
+  color: string
 }
 
-export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[] }) {
+interface ToolCarouselProps {
+  toolActions: Tool[]
+  handleClick: ((id: string) => void) | null
+  hoverId: string | null
+  setHoverId: (id: string | null) => void
+}
+
+export default function ToolCarousel({
+  toolActions,
+  handleClick,
+  hoverId,
+  setHoverId,
+}: ToolCarouselProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
-
   const [scrollTop, setScrollTop] = useState(0)
   const [isProgrammaticScroll, setIsProgrammaticScroll] = useState(false)
 
   const setCenteredTool = useToolStore((s) => s.setCenteredTool)
   const centeredTool = useToolStore((s) => s.centeredTool)
 
-  // global scroll-based animation
+  // global scroll-based motion
   const scrollYProgress = useGlobalScroll()
   const x = useTransform(scrollYProgress, [0.1, 1], ['0vw', '200vw'])
   const opacityMotion = useTransform(scrollYProgress, [0.9, 1], [1, 0])
@@ -34,7 +47,8 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
   const ITEM_TOTAL = ICON_SIZE + GAP
   const CONTAINER_HEIGHT = VISIBLE_COUNT * ITEM_TOTAL - GAP
 
-  // initialize scroll position to the middle copy
+  console.log(hoverId)
+
   useEffect(() => {
     const el = containerRef.current
     if (el) {
@@ -43,7 +57,7 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
     }
   }, [toolActions])
 
-  // infinite scroll wrapping
+  // infinite scroll
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -51,13 +65,10 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
 
     const handleScroll = () => {
       const pos = el.scrollTop
-
-      // Only wrap if user is scrolling manually
       if (!isProgrammaticScroll) {
         if (pos >= totalHeight * 2) el.scrollTop = pos - totalHeight
         else if (pos <= 0) el.scrollTop = pos + totalHeight
       }
-
       setScrollTop(el.scrollTop)
     }
 
@@ -65,7 +76,7 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
     return () => el.removeEventListener('scroll', handleScroll)
   }, [toolActions, ITEM_TOTAL, isProgrammaticScroll])
 
-  // detect which tool is centered
+  // detect centered tool
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -74,7 +85,7 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
     const containerCenter = rect.top + rect.height / 2
     const baseLength = toolActions.length
 
-    let closestTool = null
+    let closestTool: Tool | null = null
     let closestDistance = Infinity
 
     Array.from(el.children).forEach((child, i) => {
@@ -90,7 +101,7 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
     setCenteredTool(closestTool)
   }, [scrollTop, toolActions, setCenteredTool])
 
-  // scroll to clicked item using real DOM geometry
+  // scroll to clicked item
   const scrollToItem = (clickedRenderIndex: number) => {
     const el = containerRef.current
     const clickedEl = itemRefs.current[clickedRenderIndex]
@@ -109,7 +120,6 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
       behavior: 'smooth',
     })
 
-    // release after smooth scroll finishes
     setTimeout(() => {
       setIsProgrammaticScroll(false)
     }, 250)
@@ -157,10 +167,7 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
               const fadeEnd = rect.height / 1.6
               if (distance > fadeStart) {
                 const fadeRange = fadeEnd - fadeStart
-                const fadeFactor = Math.min(
-                  (distance - fadeStart) / fadeRange,
-                  1
-                )
+                const fadeFactor = Math.min((distance - fadeStart) / fadeRange, 1)
                 const eased = 1 - Math.pow(1 - fadeFactor, 1.2)
                 opacity = 1 - eased * 0.95
               }
@@ -175,6 +182,8 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
                 itemRefs.current[i] = el
               }}
               onClick={() => scrollToItem(i)}
+              onMouseEnter={() => setHoverId(actualTool.id)}
+              onMouseLeave={() => setHoverId(null)}
               className="flex items-center justify-center cursor-pointer w-14 h-14 transition-opacity duration-300"
               style={{
                 opacity,
@@ -194,6 +203,7 @@ export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[
                   height: '3rem',
                   transformOrigin: 'center',
                 }}
+                onClick={() => handleClick?.(actualTool.id)}
               />
             </div>
           )
