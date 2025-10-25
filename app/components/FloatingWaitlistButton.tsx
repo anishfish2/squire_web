@@ -1,6 +1,5 @@
 'use client'
 import { motion } from 'framer-motion'
-import { useRef } from 'react'
 import { useInView } from 'framer-motion'
 
 export default function FloatingWaitlistButton({ heroRef }: { heroRef: React.RefObject<HTMLDivElement> }) {

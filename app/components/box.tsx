@@ -104,13 +104,9 @@ function AnimatedBox({
 // ---------- Orbiting Boxes Group ----------
 function OrbitingBoxes({
   collected,
-  setCollected,
   onCollapseDone,
 }: {
   collected: { id: string; color: string; tool: string }[]
-  setCollected: React.Dispatch<
-    React.SetStateAction<{ id: string; color: string; tool: string }[]>
-  >
   onCollapseDone: () => void
 }) {
   const groupRef = useRef<THREE.Group>(null!)
@@ -178,11 +174,9 @@ function OrbitingBoxes({
 
 // ---------- CenterCube ----------
 function CenterCube({
-  phase,
   cubeVisible,
   showTexture,
 }: {
-  phase: string
   cubeVisible: boolean
   showTexture: boolean
 }) {
@@ -266,14 +260,12 @@ export default function ThreePane({
         <pointLight position={[-10, -10, -10]} intensity={Math.PI} />
 
         <CenterCube
-          phase={phase}
           cubeVisible={cubeVisible}
           showTexture={showTexture}
         />
         {phase !== 'done' && (
           <OrbitingBoxes
             collected={collected}
-            setCollected={() => {}}
             onCollapseDone={handleCollapseDone}
           />
         )}

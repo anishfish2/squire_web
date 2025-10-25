@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import useTimeStore from '../stores/timeStore'
 import { useScrollPhase } from '../hooks/useScrollPhase'

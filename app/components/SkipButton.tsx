@@ -1,6 +1,6 @@
 'use client'
-import { motion, useAnimationControls, useInView } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { motion, useAnimationControls} from 'framer-motion'
+import { useEffect, useState } from 'react'
 
 export default function SkipButton({ heroRef }: { heroRef: React.RefObject<HTMLDivElement> }) {
   const [visible, setVisible] = useState(false)

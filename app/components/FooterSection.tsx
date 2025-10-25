@@ -1,7 +1,7 @@
 
 'use client'
 import { motion } from 'framer-motion'
-import { FaGithub, FaTwitter, FaLinkedin, FaEnvelope } from 'react-icons/fa'
+import {FaTwitter, FaLinkedin, FaEnvelope } from 'react-icons/fa'
 
 export default function FooterSection() {
   return (

@@ -4,16 +4,28 @@ import { motion, useTransform } from 'framer-motion'
 import { useToolStore } from '../stores/toolStore'
 import { useGlobalScroll } from '../hooks/useGlobalScroll'
 
-export default function ToolCarousel({ toolActions }) {
+export interface ToolAction {
+  id: string
+  name: string
+  icon: string
+  description?: string
+  action?: () => void
+}
+
+export default function ToolCarousel({ toolActions }: { toolActions: ToolAction[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+
   const [scrollTop, setScrollTop] = useState(0)
+  const [isProgrammaticScroll, setIsProgrammaticScroll] = useState(false)
+
   const setCenteredTool = useToolStore((s) => s.setCenteredTool)
   const centeredTool = useToolStore((s) => s.centeredTool)
 
   // global scroll-based animation
   const scrollYProgress = useGlobalScroll()
   const x = useTransform(scrollYProgress, [0.1, 1], ['0vw', '200vw'])
-  const opacity = useTransform(scrollYProgress, [0.9, 1], [1, 0])
+  const opacityMotion = useTransform(scrollYProgress, [0.9, 1], [1, 0])
 
   // layout constants
   const VISIBLE_COUNT = 5
@@ -22,16 +34,16 @@ export default function ToolCarousel({ toolActions }) {
   const ITEM_TOTAL = ICON_SIZE + GAP
   const CONTAINER_HEIGHT = VISIBLE_COUNT * ITEM_TOTAL - GAP
 
-  // 🧭 initialize scroll position to the middle copy
+  // initialize scroll position to the middle copy
   useEffect(() => {
     const el = containerRef.current
     if (el) {
       const totalHeight = toolActions.length * ITEM_TOTAL
-      el.scrollTop = totalHeight // start in middle block
+      el.scrollTop = totalHeight
     }
   }, [toolActions])
 
-  // 🔁 infinite scroll logic
+  // infinite scroll wrapping
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -39,17 +51,21 @@ export default function ToolCarousel({ toolActions }) {
 
     const handleScroll = () => {
       const pos = el.scrollTop
-      // wrap-around illusion
-      if (pos >= totalHeight * 2) el.scrollTop = pos - totalHeight
-      else if (pos <= 0) el.scrollTop = pos + totalHeight
+
+      // Only wrap if user is scrolling manually
+      if (!isProgrammaticScroll) {
+        if (pos >= totalHeight * 2) el.scrollTop = pos - totalHeight
+        else if (pos <= 0) el.scrollTop = pos + totalHeight
+      }
+
       setScrollTop(el.scrollTop)
     }
 
     el.addEventListener('scroll', handleScroll)
     return () => el.removeEventListener('scroll', handleScroll)
-  }, [toolActions])
+  }, [toolActions, ITEM_TOTAL, isProgrammaticScroll])
 
-  // 🎯 detect which tool is centered
+  // detect which tool is centered
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -74,37 +90,36 @@ export default function ToolCarousel({ toolActions }) {
     setCenteredTool(closestTool)
   }, [scrollTop, toolActions, setCenteredTool])
 
-  // 🧩 smooth scroll to clicked item (anchored to middle copy)
-  const scrollToItem = (clickedIndex: number) => {
+  // scroll to clicked item using real DOM geometry
+  const scrollToItem = (clickedRenderIndex: number) => {
     const el = containerRef.current
-    if (!el) return
+    const clickedEl = itemRefs.current[clickedRenderIndex]
+    if (!el || !clickedEl) return
 
-    const totalHeight = toolActions.length * ITEM_TOTAL
-    const currentTop = el.scrollTop
+    const containerRect = el.getBoundingClientRect()
+    const containerCenterY = containerRect.top + containerRect.height / 2
+    const itemRect = clickedEl.getBoundingClientRect()
+    const itemCenterY = itemRect.top + itemRect.height / 2
 
-    // figure out which "copy" we're currently in (0, 1, or 2)
-    const currentCopy = Math.floor(currentTop / totalHeight)
-    const targetCopy = 1 // always scroll within middle copy
+    const delta = itemCenterY - containerCenterY
 
-    const targetIndex = clickedIndex + targetCopy * toolActions.length
-    const targetScroll =
-      targetIndex * ITEM_TOTAL - CONTAINER_HEIGHT / 2 + ICON_SIZE / 2
-
-    // avoid micro scroll flicker
-    if (Math.abs(el.scrollTop - targetScroll) < 10) return
-
+    setIsProgrammaticScroll(true)
     el.scrollTo({
-      top: targetScroll,
+      top: el.scrollTop + delta,
       behavior: 'smooth',
     })
+
+    // release after smooth scroll finishes
+    setTimeout(() => {
+      setIsProgrammaticScroll(false)
+    }, 250)
   }
 
-  // 🎠 render carousel
   return (
     <motion.div
       style={{
         x,
-        opacity,
+        opacity: opacityMotion,
         position: 'fixed',
         right: '2rem',
         top: '60%',
@@ -133,7 +148,7 @@ export default function ToolCarousel({ toolActions }) {
           if (el) {
             const rect = el.getBoundingClientRect()
             const containerCenter = rect.top + rect.height / 2
-            const item = el.children[i] as HTMLElement
+            const item = itemRefs.current[i]
             if (item) {
               const itemRect = item.getBoundingClientRect()
               const itemCenter = itemRect.top + itemRect.height / 2
@@ -156,7 +171,10 @@ export default function ToolCarousel({ toolActions }) {
             <div
               key={`${actualTool.id}-${i}`}
               id={actualTool.id}
-              onClick={() => scrollToItem(i % toolActions.length)} // ✅ scroll instead of add box
+              ref={(el) => {
+                itemRefs.current[i] = el
+              }}
+              onClick={() => scrollToItem(i)}
               className="flex items-center justify-center cursor-pointer w-14 h-14 transition-opacity duration-300"
               style={{
                 opacity,
