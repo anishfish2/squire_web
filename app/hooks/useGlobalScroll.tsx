@@ -1,16 +1,20 @@
 // hooks/useGlobalScroll.ts
-import { useScroll } from "framer-motion"
-import { createContext, useContext } from "react"
+import { useScroll, MotionValue } from 'framer-motion'
+import { createContext, useContext, ReactNode } from 'react'
 
-export const ScrollContext = createContext<{ scrollYProgress: any } | null>(null)
+interface ScrollContextType {
+  scrollYProgress: MotionValue<number>
+}
 
-export function ScrollProvider({ children }: { children: React.ReactNode }) {
-  const scroll = useScroll() // global scroll of window
+export const ScrollContext = createContext<ScrollContextType | null>(null)
+
+export function ScrollProvider({ children }: { children: ReactNode }) {
+  const scroll = useScroll()
   return <ScrollContext.Provider value={scroll}>{children}</ScrollContext.Provider>
 }
 
 export function useGlobalScroll() {
   const ctx = useContext(ScrollContext)
-  if (!ctx) throw new Error("useGlobalScroll must be used within ScrollProvider")
+  if (!ctx) throw new Error('useGlobalScroll must be used within ScrollProvider')
   return ctx.scrollYProgress
 }

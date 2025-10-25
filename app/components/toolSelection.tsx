@@ -35,7 +35,6 @@ export default function ToolDescription() {
         flex items-center justify-center gap-6
       "
     >
-      {/* ◀️ Previous */}
       <button
         onClick={() =>
           setIndex((i) =>
@@ -47,7 +46,6 @@ export default function ToolDescription() {
         &lt;
       </button>
 
-      {/* 🧠 Centered Tool Info */}
       <div className="w-[280px] flex flex-col items-center">
         <div className="text-2xl font-semibold tracking-wide text-black">
           {centeredTool.tool}
@@ -60,9 +58,7 @@ export default function ToolDescription() {
           </div>
         )}
 
-        {/* ⚡ Sleek Ripple Button */}
         <div className="relative mt-3">
-          {/* Ripple effect around border */}
           {!clicked && (
             <motion.span
               className="absolute inset-0 rounded-full border border-black/40"
@@ -85,7 +81,7 @@ export default function ToolDescription() {
           <motion.button
             onClick={() => {
               setClicked(true)
-              handleClick && handleClick(centeredTool.id)
+              handleClick?.(centeredTool.id)
             }}
             whileHover={{
               scale: 1.05,
@@ -104,7 +100,6 @@ export default function ToolDescription() {
         </div>
       </div>
 
-      {/* ▶️ Next */}
       <button
         onClick={() =>
           setIndex((i) =>
