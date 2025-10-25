@@ -8,20 +8,17 @@ import { useScrollPhase } from '../hooks/useScrollPhase'
 
 import { useGlobalScroll } from '../hooks/useGlobalScroll'
 
-// ---------- Texture Preloader ----------
 function usePreloadTextures() {
-  const gl = useThree((state) => state.gl)
   useEffect(() => {
-    const loader = new TextureLoader(gl.manager)
+    const loader = new TextureLoader()
     loader.load('/textures/Squire.png', () => {})
-  }, [gl])
+  }, [])
 }
 function TexturePreloader() {
   usePreloadTextures()
   return null
 }
 
-// ---------- Animated Orbiting Boxes ----------
 function AnimatedBox({
   index,
   total,
@@ -88,8 +85,8 @@ function AnimatedBox({
   return (
     <mesh
       ref={ref}
-      position={[0, 0, 0]} // start at center
-      scale={[0.001, 0.001, 0.001]} // start small
+      position={[0, 0, 0]}
+      scale={[0.001, 0.001, 0.001]}
       onClick={(e) => {
         e.stopPropagation()
         onClick(id)
@@ -101,7 +98,6 @@ function AnimatedBox({
   )
 }
 
-// ---------- Orbiting Boxes Group ----------
 function OrbitingBoxes({
   collected,
   onCollapseDone,
@@ -172,7 +168,6 @@ function OrbitingBoxes({
   )
 }
 
-// ---------- CenterCube ----------
 function CenterCube({
   cubeVisible,
   showTexture,
@@ -284,7 +279,6 @@ export default function ThreePane({
     alt="Squire logo"
     className="w-10 h-10 object-contain"
     style={{
-      // Fade to white as scroll approaches hero section (same range as text)
       filter: useTransform(scrollYProgress, [0.9, 1], [
         'invert(0) brightness(1)',
         'invert(1) brightness(2)',
