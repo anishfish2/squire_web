@@ -63,52 +63,51 @@ export default function BuiltSection() {
           it’s already automating real tasks across your workspace.
         </motion.p>
 
-        {/* Integration icons grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-10 justify-items-center mt-16">
-          {implementedTools.map((tool, i) => (
-            <motion.div
-              key={tool.id}
-              initial={{ opacity: 0, y: 50, rotateX: 15 }}
-              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{
-                delay: i * 0.08,
-                duration: 0.6,
-                type: 'spring',
-                stiffness: 80,
-              }}
-              whileHover={{
-                scale: 1.1,
-                rotateY: 5,
-                boxShadow: '0 0 30px rgba(255,255,255,0.2)',
-              }}
-              className="relative flex flex-col items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition duration-300"
-            >
-              {/* Fixed height image container */}
-              <div className="h-20 flex items-center justify-center">
-                <motion.div
-                  style={{ willChange: 'transform' }}
-                  animate={{ y: [0, -6 - i * 0.5, 0] }}
-                  transition={{
-                    duration: 3.5 + i * 0.2,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                >
-                  <Image
-                    src={tool.icon}
-                    alt={tool.name}
-                    width={60}
-                    height={60}
-                    className="object-contain opacity-90"
-                  />
-                </motion.div>
-              </div>
-              <p className="text-sm text-gray-300 mt-2">{tool.name}</p>
-            </motion.div>
-          ))}
-        </div>
+        
+<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-10 justify-items-center mt-16">
+  {implementedTools.map((tool, i) => (
+    <motion.div
+      key={tool.id}
+      initial={{ opacity: 0, y: 50, rotateX: 15 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      transition={{
+        delay: i * 0.08,
+        duration: 0.6,
+        type: 'spring',
+        stiffness: 80,
+      }}
+      whileHover={{
+        scale: 1.08,
+        rotateY: 5,
+        boxShadow: '0 0 25px rgba(255,255,255,0.25)',
+      }}
+      className="relative flex flex-col items-center justify-center 
+                 aspect-square w-32 sm:w-40 md:w-44 
+                 rounded-2xl bg-white/10 hover:bg-white/20 
+                 transition duration-300"
+    >
+      <motion.div
+        style={{ willChange: 'transform' }}
+        animate={{ y: [0, -6 - i * 0.5, 0] }}
+        transition={{
+          duration: 3.5 + i * 0.2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      >
+        <Image
+          src={tool.icon}
+          alt={tool.name}
+          width={60}
+          height={60}
+          className="object-contain opacity-90"
+        />
+      </motion.div>
+      <p className="text-sm text-gray-300 mt-3">{tool.name}</p>
+    </motion.div>
+  ))}
+</div>
 
-        {/* Feature chips */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -134,7 +133,6 @@ export default function BuiltSection() {
           ))}
         </motion.div>
 
-        {/* Coming soon line */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
