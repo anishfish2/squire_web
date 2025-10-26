@@ -13,10 +13,10 @@ export function useScrollPhase(): { phase: Phase; progress: number } {
   useEffect(() => {
     return scrollYProgress.onChange((v) => {
       setProgress(v)
-      if (v < 0.2) setPhase('intro')
-      else if (v < 0.3) setPhase('draw')
-      else if (v < 0.5) setPhase('click')
-      else if (v < 0.7) setPhase('merge')  
+      if (v < 0.05) setPhase('intro')
+      else if (v < 0.1) setPhase('draw')
+      else if (v < 0.3) setPhase('click')
+      else if (v < 0.4) setPhase('merge')  
       else setPhase('done')
     })
   }, [scrollYProgress])

@@ -23,7 +23,6 @@ interface ToolCarouselProps {
 
 export default function ToolCarousel({
   toolActions,
-  handleClick,
   hoverId,
   setHoverId,
 }: ToolCarouselProps) {
@@ -203,7 +202,7 @@ export default function ToolCarousel({
                   height: '3rem',
                   transformOrigin: 'center',
                 }}
-                onClick={() => handleClick?.(actualTool.id)}
+                // onClick={() => handleClick?.(actualTool.id)}
               />
             </div>
           )

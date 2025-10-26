@@ -5,20 +5,19 @@ import { OrbitControls } from '@react-three/drei'
 import { TextureLoader, CanvasTexture } from 'three'
 import { motion, useTransform } from 'framer-motion'
 import { useScrollPhase } from '../hooks/useScrollPhase'
-
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js' // important import
 import { useGlobalScroll } from '../hooks/useGlobalScroll'
 
 function usePreloadTextures() {
   useEffect(() => {
     const loader = new TextureLoader()
-    loader.load('/textures/Squire.png', () => {})
+    loader.load('/textures/Squire.png', () => { })
   }, [])
 }
 function TexturePreloader() {
   usePreloadTextures()
   return null
 }
-
 function AnimatedBox({
   index,
   total,
@@ -37,22 +36,77 @@ function AnimatedBox({
   tool: string
 }) {
   const ref = useRef<THREE.Mesh>(null!)
-  const radius = 3
   const angle = (index / total) * Math.PI * 2
-  const baseTexture = useLoader(TextureLoader, `/textures/${tool}.png`)
+  const baseTexture = useLoader(THREE.TextureLoader, `/textures/${tool}.png`)
   baseTexture.colorSpace = THREE.SRGBColorSpace
 
+  const radius = 3
+
   const texture = useMemo(() => {
+    const size = 512
     const canvas = document.createElement('canvas')
-    canvas.width = 512
-    canvas.height = 512
+    canvas.width = size
+    canvas.height = size
     const ctx = canvas.getContext('2d')!
-    const size = 512 * 0.4
-    ctx.drawImage(baseTexture.image, 256 - size / 2, 256 - size / 2, size, size)
+
+    const radius = 0
+    ctx.fillStyle = '#000000'
+
+    // ctx.clearRect(0, 0, size, size)
+    ctx.beginPath()
+    ctx.moveTo(radius, 0)
+    ctx.lineTo(size - radius, 0)
+    ctx.quadraticCurveTo(size, 0, size, radius)
+    ctx.lineTo(size, size - radius)
+    ctx.quadraticCurveTo(size, size, size - radius, size)
+    ctx.lineTo(radius, size)
+    ctx.quadraticCurveTo(0, size, 0, size - radius)
+    ctx.lineTo(0, radius)
+    ctx.quadraticCurveTo(0, 0, radius, 0)
+    ctx.closePath()
+
+    ctx.fillStyle = '#000000'
+    ctx.fill()
+
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#000000'
+    ctx.stroke()
+
+    if (baseTexture.image) {
+      const iconSize = size * 0.45
+      ctx.drawImage(
+        baseTexture.image,
+        size / 2 - iconSize / 2,
+        size / 2 - iconSize / 2,
+        iconSize,
+        iconSize
+      )
+    }
+
     const t = new CanvasTexture(canvas)
+    t.colorSpace = THREE.SRGBColorSpace
     t.needsUpdate = true
     return t
   }, [baseTexture])
+
+  const geometry = useMemo(() => {
+    return new RoundedBoxGeometry(1, 1, 1, 4, 0)
+  }, [])
+
+  const materials = useMemo(() => {
+
+    const mat = new THREE.MeshStandardMaterial({
+      map: texture,
+      roughness: 0.4,
+      metalness: 0.1,
+      transparent: false,
+      opacity: 1,
+      alphaTest: 1,
+      side: THREE.DoubleSide,
+    })
+
+    return [mat, mat, mat, mat, mat, mat]
+  }, [texture])
 
   const radiusVec = useMemo(
     () => new THREE.Vector3(radius * Math.cos(angle), 0, radius * Math.sin(angle)),
@@ -63,21 +117,13 @@ function AnimatedBox({
 
   useFrame((state, delta) => {
     if (!ref.current) return
-
     if (!isMerging && !isDone) {
-      // Ease outward + scale up from small
       setSpawnProgress((p) => Math.min(p + delta * 1.5, 1))
-      const eased = 1 - Math.pow(1 - spawnProgress, 3) // easeOutCubic
-
-      // Position grows outward
+      const eased = 1 - Math.pow(1 - spawnProgress, 3)
       const pos = radiusVec.clone().multiplyScalar(eased)
       ref.current.position.lerp(pos, 0.2)
-
-      // Scale grows from tiny to full size
       const targetScale = new THREE.Vector3(eased, eased, eased)
       ref.current.scale.lerp(targetScale, 0.15)
-
-      // Subtle float motion
       ref.current.position.y = Math.sin(state.clock.elapsedTime * 2 + index) * 0.2
     }
   })
@@ -85,16 +131,14 @@ function AnimatedBox({
   return (
     <mesh
       ref={ref}
-      position={[0, 0, 0]}
-      scale={[0.001, 0.001, 0.001]}
       onClick={(e) => {
         e.stopPropagation()
         onClick(id)
       }}
-    >
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial map={texture} />
-    </mesh>
+      scale={[0.001, 0.001, 0.001]}
+      geometry={geometry}
+      material={materials}
+    />
   )
 }
 
@@ -160,7 +204,7 @@ function OrbitingBoxes({
           total={collected.length}
           isMerging={isMerging}
           isDone={isDone}
-          onClick={() => {}}
+          onClick={() => { }}
           tool={box.tool}
         />
       ))}
@@ -176,35 +220,74 @@ function CenterCube({
   showTexture: boolean
 }) {
   const ref = useRef<THREE.Mesh>(null!)
-  const matRef = useRef<THREE.MeshStandardMaterial>(null!)
-  const texture = useLoader(TextureLoader, '/textures/Squire.png')
-  texture.colorSpace = THREE.SRGBColorSpace
-  texture.needsUpdate = true
+  const baseTexture = useLoader(TextureLoader, '/textures/Squire.png')
+  baseTexture.colorSpace = THREE.SRGBColorSpace
+
+  const cardTexture = useMemo(() => {
+    const size = 512
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')!
+
+    const radius = 0
+    ctx.clearRect(0, 0, size, size)
+
+    // Rounded rect path
+    ctx.beginPath()
+    ctx.moveTo(radius, 0)
+    ctx.lineTo(size - radius, 0)
+    ctx.quadraticCurveTo(size, 0, size, radius)
+    ctx.lineTo(size, size - radius)
+    ctx.quadraticCurveTo(size, size, size - radius, size)
+    ctx.lineTo(radius, size)
+    ctx.quadraticCurveTo(0, size, 0, size - radius)
+    ctx.lineTo(0, radius)
+    ctx.quadraticCurveTo(0, 0, radius, 0)
+    ctx.closePath()
+
+    ctx.fillStyle = '#000000'
+    ctx.fill()
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#000000'
+    ctx.stroke()
+
+    if (showTexture && baseTexture.image) {
+      const iconSize = size * 0.45
+      ctx.drawImage(
+        baseTexture.image,
+        size / 2 - iconSize / 2,
+        size / 2 - iconSize / 2,
+        iconSize,
+        iconSize
+      )
+    }
+
+    const t = new CanvasTexture(canvas)
+    t.needsUpdate = true
+    return t
+  }, [showTexture, baseTexture])
 
   useFrame((_, delta) => {
-    if (!ref.current || !matRef.current) return
-    const mat = matRef.current
+    if (!ref.current) return
     ref.current.rotation.x += delta * 0.4
     ref.current.rotation.y += delta * 0.25
-
-    const targetOpacity = cubeVisible ? 1 : 0
-    mat.opacity = THREE.MathUtils.lerp(mat.opacity, targetOpacity, delta * 3)
-
-    mat.map = showTexture ? texture : null
-    mat.color.set(showTexture ? '#ffffff' : '#000000')
-    mat.needsUpdate = true
   })
 
+  const materials = useMemo(() => {
+    const mat = new THREE.MeshStandardMaterial({
+      map: cardTexture,
+      roughness: 0.4,
+      metalness: 0.1,
+      transparent: true,
+      opacity: cubeVisible ? 1 : 0,
+    })
+    return [mat, mat, mat, mat, mat, mat]
+  }, [cardTexture, cubeVisible])
+
   return (
-    <mesh ref={ref}>
+    <mesh ref={ref} material={materials}>
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial
-        ref={matRef}
-        transparent
-        opacity={1}
-        color={'#000000'}
-        roughness={1}
-      />
     </mesh>
   )
 }
@@ -267,33 +350,52 @@ export default function ThreePane({
         <OrbitControls enableZoom={false} enablePan enableRotate />
       </Canvas>
 
-      
-<motion.div
-  initial={{ opacity: 0 }}
-  animate={{ opacity: showLogo ? 1 : 0 }}
-  transition={{ duration: 0.8, ease: 'easeInOut' }}
-  className="absolute top-8 left-10 flex items-center gap-3 pointer-events-auto"
->
-  <motion.img
-    src="/textures/Squire.png"
-    alt="Squire logo"
-    className="w-10 h-10 object-contain"
-    style={{
-      filter: useTransform(scrollYProgress, [0.9, 1], [
-        'invert(0) brightness(1)',
-        'invert(1) brightness(2)',
-      ]),
-    }}
-    transition={{ duration: 0.6, ease: 'easeInOut' }}
-  />
 
-  <motion.span
-    className="text-4xl font-bold tracking-tight select-none"
-    style={{ color: textColor }}
-  >
-    Squire
-  </motion.span>
-</motion.div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showLogo ? 1 : 0 }}
+        transition={{ duration: 0.8, ease: 'easeInOut' }}
+        className="absolute top-8 left-10 flex items-center gap-3 pointer-events-auto"
+      >
+        <motion.img
+          src="/textures/Squire.png"
+          alt="Squire logo"
+          className="w-10 h-10 z-100 object-contain"
+          style={{
+            filter: useTransform(scrollYProgress, [0.9, 1], [
+              'invert(0) brightness(1)',
+              'invert(1) brightness(2)',
+            ]),
+          }}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
+        />
+
+        <motion.span
+          className="text-4xl font-bold tracking-tight select-none"
+          style={{ color: textColor }}
+        >
+          Squire
+        </motion.span>
+      </motion.div>
+
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: [0, 1, 1, 0], y: [0, -5, 0, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 text-gray-400 text-sm tracking-wide z-[60] pointer-events-none"
+      >
+        <div className="flex flex-col items-center space-y-2">
+          <span>Scroll to explore</span>
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-[2px] h-5 bg-white/50 rounded-full"
+          />
+        </div>
+      </motion.div>
+
+
     </div>
   )
 }

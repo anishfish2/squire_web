@@ -25,12 +25,14 @@ export default function IntroText() {
       }}
       className="flex flex-col text-left relative"
     >
+      {/* Top Text */}
       <div
-        className={`text-black font-extrabold leading-[0.9] text-[14rem] relative`}
+        className={`text-black font-extrabold leading-[0.9] ${font.className} text-[14rem] relative`}
       >
-        <div className={`${font.className}`}>Squire</div>
+        Squire
+        {/* Bottom Text overlay */}
         <div
-          className="absolute translate-x-[50%] bottom-[-.5rem] text-black text-xl font-semibold leading-none"
+          className="absolute left-1/2 translate-x-[-50%] bottom-[-1.5rem] text-black text-5xl font-semibold leading-none"
         >
           Record it once. Automate it always.
         </div>

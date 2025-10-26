@@ -1,9 +1,9 @@
 'use client'
-import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { useTransform } from 'framer-motion'
+import { motion, useTransform } from 'framer-motion'
 import { useGlobalScroll } from '../hooks/useGlobalScroll'
 import { useToolStore } from '../stores/toolStore'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function ToolDescription() {
   const centeredTool = useToolStore((s) => s.centeredTool)
@@ -29,77 +29,63 @@ export default function ToolDescription() {
         translateX: '-50%',
         zIndex: 9999,
       }}
-      className="
-        text-center select-none
-        transition-all duration-500 ease-out
-        flex items-center justify-center gap-6
-      "
+      className="text-center select-none transition-all duration-500 ease-out flex items-center justify-center gap-6"
     >
+      {/* Left Button */}
       <button
         onClick={() =>
           setIndex((i) =>
             i === 0 ? centeredTool.functions.length - 1 : i - 1
           )
         }
-        className="text-3xl text-black hover:text-gray-500 transition-colors duration-200"
+        className="p-2 rounded-full border border-transparent hover:border-black/20 hover:bg-black/5 transition-all duration-200"
       >
-        &lt;
+        <ChevronLeft size={28} strokeWidth={1.5} className="text-black" />
       </button>
 
+      {/* Tool Info */}
       <div className="w-[280px] flex flex-col items-center">
         <div className="text-2xl font-semibold tracking-wide text-black">
           {centeredTool.tool}
         </div>
 
         {currentFunc && (
-          <div className="text-lg text-black mt-1">
-            {currentFunc.name}
-            <span className="ml-3 text-sm text-black">{currentFunc.time}</span>
-          </div>
-        )}
-
-        <div className="relative mt-3">
-          {!clicked && (
-            <motion.span
-              className="absolute inset-0 rounded-full border border-black/40"
-              style={{
-                scale: 1,
-                opacity: 0.8,
-              }}
-              animate={{
-                scale: [1, 1.4],
-                opacity: [0.8, 0],
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: 'easeOut',
-              }}
-            />
-          )}
-
-          <motion.button
+          <motion.div
             onClick={() => {
               setClicked(true)
               handleClick?.(centeredTool.id)
             }}
-            whileHover={{
-              scale: 1.05,
-              backgroundColor: '#000',
-              color: '#fff',
-            }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="
-              relative z-10 px-5 py-2 text-sm font-medium border border-black
-              rounded-full text-black bg-white/90 backdrop-blur-sm
-              hover:bg-black hover:text-white transition-all duration-300
+              mt-2 cursor-pointer relative text-lg text-black font-medium
+              transition-all duration-200 hover:text-gray-700 select-none
             "
           >
-            Add to workflow
-          </motion.button>
-        </div>
+            {/* Ripple pulse effect around task when not clicked */}
+            {!clicked && (
+              <motion.span
+                className="absolute -inset-2 rounded-full border border-black/30 pointer-events-none"
+                animate={{
+                  scale: [1, 1.4],
+                  opacity: [0.8, 0],
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: 'easeOut',
+                }}
+              />
+            )}
+            {currentFunc.name}
+            <span className="ml-3 text-sm text-black/70">
+              {currentFunc.time}
+            </span>
+          </motion.div>
+        )}
       </div>
 
+      {/* Right Button */}
       <button
         onClick={() =>
           setIndex((i) =>
@@ -108,9 +94,9 @@ export default function ToolDescription() {
               : 0
           )
         }
-        className="text-3xl text-black hover:text-gray-500 transition-colors duration-200"
+        className="p-2 rounded-full border border-transparent hover:border-black/20 hover:bg-black/5 transition-all duration-200"
       >
-        &gt;
+        <ChevronRight size={28} strokeWidth={1.5} className="text-black" />
       </button>
     </motion.div>
   )
