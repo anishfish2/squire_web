@@ -43,7 +43,20 @@ function AnimatedBox({
 }) {
   const ref = useRef<THREE.Mesh>(null!)
   const angle = (index / total) * Math.PI * 2
-  const baseTexture = useLoader(THREE.TextureLoader, `/textures/${tool}.png`)
+
+  let baseTexture = useLoader(THREE.TextureLoader, `/textures/${tool}.png`)
+
+  console.log(tool)
+
+  if (tool === 'GitHub') {
+    baseTexture = useLoader(THREE.TextureLoader, `/textures/Github_white.png`)
+  }
+
+  if (tool === 'Linear') {
+    baseTexture = useLoader(THREE.TextureLoader, `/textures/Linear_white.png`)
+  }
+    
+
   baseTexture.colorSpace = THREE.SRGBColorSpace
 
   const radius = 3
@@ -56,7 +69,7 @@ function AnimatedBox({
     const ctx = canvas.getContext('2d')!
 
     const radius = 0
-    ctx.fillStyle = '#000000'
+    ctx.fillStyle = '#ffffff'
 
     // ctx.clearRect(0, 0, size, size)
     ctx.beginPath()
@@ -74,8 +87,8 @@ function AnimatedBox({
     ctx.fillStyle = '#000000'
     ctx.fill()
 
-    ctx.lineWidth = 12
-    ctx.strokeStyle = '#000000'
+    ctx.lineWidth = 48 
+    ctx.strokeStyle = '#ffffff'
     ctx.stroke()
 
     if (baseTexture.image) {
@@ -254,8 +267,8 @@ function CenterCube({
 
     ctx.fillStyle = '#000000'
     ctx.fill()
-    ctx.lineWidth = 12
-    ctx.strokeStyle = '#000000'
+    ctx.lineWidth = 48 
+    ctx.strokeStyle = '#ffffff'
     ctx.stroke()
 
     if (showTexture && baseTexture.image) {

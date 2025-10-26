@@ -7,15 +7,14 @@ const mainFont = Instrument_Sans({
   subsets: ["latin"],
 })
 
-// ✅ Existing implemented tools
 const implementedTools = [
   { id: 'slack', name: 'Slack', icon: '/textures/Slack.png' },
   { id: 'gmail', name: 'Gmail', icon: '/textures/Gmail.png' },
   { id: 'gdrive', name: 'Drive', icon: '/textures/Google Drive.png' },
   { id: 'notion', name: 'Notion', icon: '/textures/Notion.png' },
-  { id: 'linear', name: 'Linear', icon: '/textures/Linear.png' },
+  { id: 'linear', name: 'Linear', icon: '/textures/Linear_white.png' },
   { id: 'gsheets', name: 'Sheets', icon: '/textures/Google Sheets.png' },
-  { id: 'github', name: 'GitHub', icon: '/textures/Github.png' },
+  { id: 'github', name: 'GitHub', icon: '/textures/Github_white.png' },
   { id: 'figma', name: 'Figma', icon: '/textures/Figma.png' },
 ]
 

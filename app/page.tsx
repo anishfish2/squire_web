@@ -96,10 +96,76 @@ export default function Home() {
 
 
 
+useEffect(() => {
+  const heroEl = heroRef.current
+  if (!heroEl) return
+
+  let isHeroVisible = false
+  let targetScroll = window.scrollY
+  let currentScroll = window.scrollY
+  let rafId: number | null = null
+  const slowFactor = 0.2 // 👈 smaller = slower scroll
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      isHeroVisible = entry.isIntersecting
+
+      // Toggle overflow lock when Hero is visible
+      if (isHeroVisible) {
+        document.body.style.overflow = 'hidden'
+      } else {
+        document.body.style.overflow = ''
+      }
+    },
+    { threshold: 0.4 }
+  )
+  observer.observe(heroEl)
+
+  const handleWheel = (e: WheelEvent) => {
+    if (!isHeroVisible) return
+    e.preventDefault()
+    targetScroll += e.deltaY * slowFactor
+    targetScroll = Math.max(0, Math.min(targetScroll, document.body.scrollHeight - window.innerHeight))
+    if (!rafId) rafId = requestAnimationFrame(step)
+  }
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isHeroVisible) return
+    e.preventDefault()
+  }
+
+  const step = () => {
+    currentScroll += (targetScroll - currentScroll) * 0.15
+    window.scrollTo(0, currentScroll)
+    if (Math.abs(targetScroll - currentScroll) > 0.5) {
+      rafId = requestAnimationFrame(step)
+    } else {
+      rafId = null
+    }
+  }
+
+  window.addEventListener('wheel', handleWheel, { passive: false })
+  window.addEventListener('touchmove', handleTouchMove, { passive: false })
+
+  return () => {
+    window.removeEventListener('wheel', handleWheel)
+    window.removeEventListener('touchmove', handleTouchMove)
+    observer.disconnect()
+    if (rafId) cancelAnimationFrame(rafId)
+    document.body.style.overflow = ''
+  }
+}, [])
+
+
+
+
+
+
+
   return (
     <div className="relative overflow-hidden scrollbar-hide">
       <ScrollProvider>
-        <main className="hidden lg:block relative overflow-hidden min-h-[400vh] scrollbar-hide">
+        <main className="hidden lg:block relative overflow-hidden min-h-[900vh] scrollbar-hide">
           <FloatingWaitlistButton heroRef={heroRef} />
           <SkipButton heroRef={heroRef} />
 

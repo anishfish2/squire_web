@@ -19,7 +19,7 @@ export default function ScrollIndicator({ heroRef, hasCollected }: ScrollIndicat
         y: heroInView ? 10 : 0,
       }}
       transition={{ duration: 0.8, ease: 'easeInOut' }}
-      className="fixed bottom-6 inset-x-0 flex justify-center z-[999] pointer-events-none"
+      className="fixed bottom-2 inset-x-0 flex justify-center z-[999] pointer-events-none"
     >
       <motion.div
         animate={{ y: [0, 6, 0] }}

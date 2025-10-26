@@ -1,15 +1,16 @@
 'use client'
 import { useState } from 'react'
 import { motion, useTransform } from 'framer-motion'
-import { useGlobalScroll } from '../hooks/useGlobalScroll'
-import { useToolStore } from '../stores/toolStore'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
+import { useToolStore } from '../stores/toolStore'
+import { useGlobalScroll } from '../hooks/useGlobalScroll'
 
 export default function ToolDescription() {
   const centeredTool = useToolStore((s) => s.centeredTool)
   const handleClick = useToolStore((s) => s.handleClick)
   const [index, setIndex] = useState(0)
-  const [clicked, setClicked] = useState(false)
+  const [hasAdded, setHasAdded] = useState(false)
 
   const scrollYProgress = useGlobalScroll()
   const y = useTransform(scrollYProgress, [0.1, 1], ['0vh', '240vh'])
@@ -17,6 +18,11 @@ export default function ToolDescription() {
 
   if (!centeredTool) return null
   const currentFunc = centeredTool.functions?.[index]
+
+  const handleAdd = (id: string) => {
+    handleClick?.(id)
+    setHasAdded(true)
+  }
 
   return (
     <motion.div
@@ -29,75 +35,89 @@ export default function ToolDescription() {
         translateX: '-50%',
         zIndex: 9999,
       }}
-      className="text-center select-none transition-all duration-500 ease-out flex items-center justify-center gap-6"
+      className="select-none transition-all duration-500 ease-out flex items-center justify-center gap-10"
     >
-      {/* Left Button */}
-      <button
-        onClick={() =>
-          setIndex((i) =>
-            i === 0 ? centeredTool.functions.length - 1 : i - 1
-          )
-        }
-        className="p-2 rounded-full border border-transparent hover:border-black/20 hover:bg-black/5 transition-all duration-200"
-      >
-        <ChevronLeft size={28} strokeWidth={1.5} className="text-black" />
-      </button>
+      {/* 👈 Left Button (fixed position) */}
+      <div className="flex-shrink-0">
+        <button
+          onClick={() =>
+            setIndex((i) =>
+              i === 0 ? centeredTool.functions.length - 1 : i - 1
+            )
+          }
+          className="p-2 rounded-full border border-transparent hover:border-black/20 hover:bg-black/5 transition-all duration-200 flex items-center justify-center"
+        >
+          <ChevronLeft size={26} strokeWidth={1.5} className="text-black" />
+        </button>
+      </div>
 
-      {/* Tool Info */}
-      <div className="w-[280px] flex flex-col items-center">
-        <div className="text-2xl font-semibold tracking-wide text-black">
+      {/* 🧠 Center content */}
+      <div className="flex flex-col items-center justify-center w-[280px] text-center">
+        <div className="text-2xl font-semibold tracking-wide text-black whitespace-nowrap">
           {centeredTool.tool}
         </div>
 
         {currentFunc && (
-          <motion.div
-            onClick={() => {
-              setClicked(true)
-              handleClick?.(centeredTool.id)
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="
-              mt-2 cursor-pointer relative text-lg text-black font-medium
-              transition-all duration-200 hover:text-gray-700 select-none
-            "
-          >
-            {/* Ripple pulse effect around task when not clicked */}
-            {!clicked && (
-              <motion.span
-                className="absolute -inset-2 rounded-full border border-black/30 pointer-events-none"
+          <div className="relative mt-2 flex items-center justify-center">
+            {!hasAdded && (
+              <motion.div
+                initial={{ rotate: 45 }}
                 animate={{
-                  scale: [1, 1.4],
-                  opacity: [0.8, 0],
+                  rotate: [40, 50, 40, 50, 45],
+                  x: [-4, 4, -4, 4, 0],
                 }}
                 transition={{
-                  duration: 2.5,
+                  duration: 1.2,
                   repeat: Infinity,
-                  ease: 'easeOut',
+                  ease: 'easeInOut',
                 }}
-              />
+                className="absolute -top-36 -left-40 pointer-events-none"
+              >
+                <Image
+                  src="/textures/arrow.png"
+                  alt="Arrow pointing to add button"
+                  width={180}
+                  height={180}
+                  className="opacity-90 rotate-[-45deg]"
+                />
+              </motion.div>
             )}
-            {currentFunc.name}
-            <span className="ml-3 text-sm text-black/70">
-              {currentFunc.time}
-            </span>
-          </motion.div>
+
+            <motion.button
+              onClick={() => handleAdd(centeredTool.id)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="
+                px-5 py-2 rounded-full 
+                bg-black text-white font-medium text-base
+                transition-all duration-300 hover:bg-gray-900
+                flex items-center justify-center whitespace-nowrap
+              "
+            >
+              {currentFunc.name}
+              <span className="ml-2 text-sm text-white/80">
+                {currentFunc.time}
+              </span>
+            </motion.button>
+          </div>
         )}
       </div>
 
-      {/* Right Button */}
-      <button
-        onClick={() =>
-          setIndex((i) =>
-            centeredTool.functions && centeredTool.functions.length > 0
-              ? (i + 1) % centeredTool.functions.length
-              : 0
-          )
-        }
-        className="p-2 rounded-full border border-transparent hover:border-black/20 hover:bg-black/5 transition-all duration-200"
-      >
-        <ChevronRight size={28} strokeWidth={1.5} className="text-black" />
-      </button>
+      {/* 👉 Right Button (fixed position) */}
+      <div className="flex-shrink-0">
+        <button
+          onClick={() =>
+            setIndex((i) =>
+              centeredTool.functions && centeredTool.functions.length > 0
+                ? (i + 1) % centeredTool.functions.length
+                : 0
+            )
+          }
+          className="p-2 rounded-full border border-transparent hover:border-black/20 hover:bg-black/5 transition-all duration-200 flex items-center justify-center"
+        >
+          <ChevronRight size={26} strokeWidth={1.5} className="text-black" />
+        </button>
+      </div>
     </motion.div>
   )
 }
