@@ -377,25 +377,6 @@ export default function ThreePane({
           Squire
         </motion.span>
       </motion.div>
-
-
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: [0, 1, 1, 0], y: [0, -5, 0, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 text-gray-400 text-sm tracking-wide z-[60] pointer-events-none"
-      >
-        <div className="flex flex-col items-center space-y-2">
-          <span>Scroll to explore</span>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-[2px] h-5 bg-white/50 rounded-full"
-          />
-        </div>
-      </motion.div>
-
-
     </div>
   )
 }

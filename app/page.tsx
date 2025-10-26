@@ -17,6 +17,7 @@ import FooterSection from './components/FooterSection'
 import FloatingWaitlistButton from './components/FloatingWaitlistButton'
 import SkipButton from './components/SkipButton'
 import { toolActions } from './uitls/tools_list'
+import ScrollIndicator from './components/scrollIndicator'
 
 
 function parseTimeString(timeStr: string): number {
@@ -135,6 +136,8 @@ return (
         <section className="bg-white z-[20] relative">
           <IntroText />
         </section>
+                <ScrollIndicator heroRef={heroRef} />
+
       </main>
 
       <div
