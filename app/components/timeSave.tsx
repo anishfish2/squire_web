@@ -70,7 +70,7 @@ export default function TimeSave() {
         style={{
           fontSize: `${fontScale}vw`,
           lineHeight: 1,
-          letterSpacing: '-0.05em',
+          letterSpacing: '-0.04em',
           userSelect: 'none',
           opacity: isGlitching ? 0.85 : 1,
           animation: isGlitching ? 'softGlitch 0.6s ease-in-out infinite' : 'none',

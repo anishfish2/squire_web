@@ -1,6 +1,11 @@
 'use client'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { Instrument_Sans } from "next/font/google"
+
+const mainFont = Instrument_Sans({
+  subsets: ["latin"],
+})
 
 // ✅ Existing implemented tools
 const implementedTools = [
@@ -16,7 +21,7 @@ const implementedTools = [
 
 export default function BuiltSection() {
   return (
-    <section className="relative bg-black text-white py-32 overflow-hidden">
+    <section className={`relative bg-black text-white py-32 overflow-hidden ${mainFont.className}`}>
       {/* Subtle animated gradient background */}
       <motion.div
         className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.05),transparent_60%)]"

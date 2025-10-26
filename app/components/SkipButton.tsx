@@ -8,7 +8,6 @@ export default function SkipButton({ heroRef }: { heroRef: React.RefObject<HTMLD
   const controls = useAnimationControls()
 
   useEffect(() => {
-    // fade in button after 2.5s
     const timeout = setTimeout(() => setVisible(true), 2500)
     return () => clearTimeout(timeout)
   }, [])
@@ -16,15 +15,14 @@ export default function SkipButton({ heroRef }: { heroRef: React.RefObject<HTMLD
   useEffect(() => {
     if (!heroRef.current) return
 
-    // ✅ attach observer to the viewport explicitly (root = null)
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0]
         setHeroVisible(entry.isIntersecting)
       },
       {
-        root: null, // observe relative to viewport
-        threshold: 0.25, // triggers when ~25% of hero is visible
+        root: null,
+        threshold: 0.25,
       }
     )
 
@@ -33,15 +31,18 @@ export default function SkipButton({ heroRef }: { heroRef: React.RefObject<HTMLD
     return () => observer.disconnect()
   }, [heroRef])
 
-  const handleClick = () => {
-    if (heroVisible) {
-      // scroll to very top
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } else if (heroRef.current) {
-      // scroll down to hero
-      heroRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
+
+const handleClick = () => {
+  if (!heroRef.current) return
+
+  if (heroVisible) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } else {
+    const top = heroRef.current.getBoundingClientRect().top + window.scrollY
+    window.scrollTo({ top, behavior: 'smooth' })
   }
+}
+
 
   return (
     <motion.div
@@ -78,7 +79,7 @@ export default function SkipButton({ heroRef }: { heroRef: React.RefObject<HTMLD
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
-          {heroVisible ? 'Back to Top ↑' : 'Skip to Info↓'}
+          {heroVisible ? 'Back to Top ↑' : 'Skip to Info ↓'}
         </motion.span>
       </motion.button>
     </motion.div>

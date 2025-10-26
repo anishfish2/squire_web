@@ -105,6 +105,7 @@ export default function DrawBoxOverlay() {
           transition={{ duration: 0.6 }}
           className="absolute inset-0 flex items-center justify-center text-black/25 font-semibold tracking-wide select-none"
         >
+          {isDrawing && 'Recording Region'}
         </motion.div>
       </motion.div>
     </div>

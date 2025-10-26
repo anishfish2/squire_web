@@ -10,7 +10,6 @@ import { useToolStore } from './stores/toolStore'
 import { ScrollProvider } from './hooks/useGlobalScroll'
 import DrawBoxOverlay from './components/drawOverlay'
 import { motion } from 'framer-motion'
-
 import HeroSection from './components/HeroSection'
 import BuiltSection from './components/BuiltSection'
 import FooterSection from './components/FooterSection'
@@ -18,7 +17,7 @@ import FloatingWaitlistButton from './components/FloatingWaitlistButton'
 import SkipButton from './components/SkipButton'
 import { toolActions } from './uitls/tools_list'
 import ScrollIndicator from './components/scrollIndicator'
-
+import MobileHeader from './components/MobileHeader'
 
 function parseTimeString(timeStr: string): number {
   if (!timeStr) return 0
@@ -48,16 +47,13 @@ function parseTimeString(timeStr: string): number {
   }
 }
 
-
 export default function Home() {
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [collected, setCollected] = useState<{ id: string; color: string; tool: string }[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const { time, setTime } = useTimeStore()
   const [showTime, setShowTime] = useState(true)
-    const heroRef = useRef<HTMLDivElement | null>(null)
-
-
+  const heroRef = useRef<HTMLDivElement | null>(null)
 
   const handleClick = useCallback((id: string) => {
     const clicked = toolActions.find((t) => t.id === id)
@@ -98,58 +94,64 @@ export default function Home() {
     }
   }
 
-return (
-  <div className={`relative overflow-hidden scrollbar-hide`}>
-    <ScrollProvider>
-      <main className="relative overflow-hidden min-h-[400vh] scrollbar-hide">
-        <FloatingWaitlistButton heroRef={heroRef} />
-        <SkipButton heroRef={heroRef} />
 
-        <div className="fixed right-6 translate-y-1/4 flex flex-col items-center gap-8 h-[60vh] overflow-visible z-[600] pt-6 pr-6 pl-6 pb-6">
-          <ToolCarousel
-            toolActions={toolActions}
-            handleClick={handleClick}
-            hoverId={hoverId}
-            setHoverId={setHoverId}
-          />
-        </div>
 
-        <div ref={containerRef} className="fixed inset-0 z-50 pointer-events-none">
-          <ThreePane collected={collected} onCubeVisibleChange={handleCubeVisibleChange} />
-          <DrawBoxOverlay />
-        </div>
+  return (
+    <div className="relative overflow-hidden scrollbar-hide">
+      <ScrollProvider>
+        <main className="hidden lg:block relative overflow-hidden min-h-[400vh] scrollbar-hide">
+          <FloatingWaitlistButton heroRef={heroRef} />
+          <SkipButton heroRef={heroRef} />
 
-        <div>
+          <div className="fixed right-6 translate-y-1/4 flex flex-col items-center gap-8 h-[60vh] overflow-visible z-[600] pt-6 pr-6 pl-6 pb-6">
+            <ToolCarousel
+              toolActions={toolActions}
+              handleClick={handleClick}
+              hoverId={hoverId}
+              setHoverId={setHoverId}
+            />
+          </div>
+
+          <div ref={containerRef} className="fixed inset-0 z-50 pointer-events-none">
+            <ThreePane collected={collected} onCubeVisibleChange={handleCubeVisibleChange} />
+            <DrawBoxOverlay />
+          </div>
+
           <ToolDescription />
+
+          <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-[55]">
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: showTime ? 1 : 0 }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+            >
+              <TimeSave />
+            </motion.div>
+          </div>
+
+          <section className="bg-white z-[20] relative">
+            <IntroText />
+          </section>
+
+          
+          <ScrollIndicator heroRef={heroRef} hasCollected={!!collected.length} />
+
+        </main>
+
+        <div className="block lg:hidden relative z-[40] pointer-events-auto">
+
+
+          <MobileHeader />
+
         </div>
-
-        <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-[55]">
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={{ opacity: showTime ? 1 : 0 }}
-            transition={{ duration: 0.8, ease: 'easeInOut' }}
-          >
-            <TimeSave />
-          </motion.div>
+        <div ref={heroRef} className="pt-16">
+          <HeroSection />
+          <BuiltSection />
+          <FooterSection />
         </div>
+      </ScrollProvider>
+    </div>
+  )
 
-        <section className="bg-white z-[20] relative">
-          <IntroText />
-        </section>
-                <ScrollIndicator heroRef={heroRef} />
-
-      </main>
-
-      <div
-        className="relative z-[40] pointer-events-auto"
-        ref={heroRef}
-      >
-        <HeroSection />
-        <BuiltSection />
-        <FooterSection />
-      </div>
-    </ScrollProvider>
-  </div>
-)
 }
 

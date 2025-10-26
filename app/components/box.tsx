@@ -7,6 +7,12 @@ import { motion, useTransform } from 'framer-motion'
 import { useScrollPhase } from '../hooks/useScrollPhase'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js' // important import
 import { useGlobalScroll } from '../hooks/useGlobalScroll'
+import { Paytone_One } from 'next/font/google'
+
+const mainFont = Paytone_One({
+  weight: "400",
+  subsets: ["latin"],
+})
 
 function usePreloadTextures() {
   useEffect(() => {
@@ -354,13 +360,13 @@ export default function ThreePane({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: showLogo ? 1 : 0 }}
-        transition={{ duration: 0.8, ease: 'easeInOut' }}
+        transition={{ duration: 0.1, ease: 'easeInOut' }}
         className="absolute top-8 left-10 flex items-center gap-3 pointer-events-auto"
       >
         <motion.img
           src="/textures/Squire.png"
           alt="Squire logo"
-          className="w-10 h-10 z-100 object-contain"
+          className="w-12 h-12 z-100 object-contain"
           style={{
             filter: useTransform(scrollYProgress, [0.9, 1], [
               'invert(0) brightness(1)',
@@ -371,10 +377,10 @@ export default function ThreePane({
         />
 
         <motion.span
-          className="text-4xl font-bold tracking-tight select-none"
+          className={`text-3xl -mt-2 font-bold select-none ${mainFont.className}`}
           style={{ color: textColor }}
         >
-          Squire
+          squire
         </motion.span>
       </motion.div>
     </div>

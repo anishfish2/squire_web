@@ -1,6 +1,11 @@
 'use client'
 import { motion, useAnimation, useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
+import { Instrument_Sans } from "next/font/google"
+
+const mainFont = Instrument_Sans({
+  subsets: ["latin"],
+})
 
 export default function HeroSection() {
   const ref = useRef<HTMLDivElement>(null)
@@ -15,7 +20,7 @@ export default function HeroSection() {
   return (
     <section
       ref={ref}
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-white via-gray-50 to-gray-100"
+      className={`relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-white via-gray-50 to-gray-100 ${mainFont.className}`}
     >
       {/* Floating gradient blobs */}
       <motion.div
