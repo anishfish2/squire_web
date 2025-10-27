@@ -202,7 +202,6 @@ export default function ToolCarousel({
                   height: '3rem',
                   transformOrigin: 'center',
                 }}
-                // onClick={() => handleClick?.(actualTool.id)}
               />
             </div>
           )

@@ -139,7 +139,7 @@ export const toolActions = [
       { name: 'Fetch Repository Info', time: '1 min' },
     ],
     time: '2.5 min',
-    iconPath: '/textures/Github.png',
+    iconPath: '/textures/GitHub.png',
     color: '#000000',
   },
 ]
