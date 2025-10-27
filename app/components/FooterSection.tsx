@@ -1,7 +1,6 @@
-
 'use client'
 import { motion } from 'framer-motion'
-import {FaTwitter, FaLinkedin, FaEnvelope } from 'react-icons/fa'
+import { FaXTwitter, FaLinkedin, FaEnvelope } from 'react-icons/fa6'
 
 export default function FooterSection() {
   return (
@@ -31,10 +30,10 @@ export default function FooterSection() {
             href="https://x.com/Anishfishhh"
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ scale: 1.2, color: '#1DA1F2' }}
+            whileHover={{ scale: 1.2, color: '#ffffff' }}
             transition={{ type: 'spring', stiffness: 200, damping: 10 }}
           >
-            <FaTwitter />
+            <FaXTwitter />
           </motion.a>
           <motion.a
             href="https://www.linkedin.com/in/anishkarthik/"
