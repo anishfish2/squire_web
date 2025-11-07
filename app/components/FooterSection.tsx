@@ -53,6 +53,20 @@ export default function FooterSection() {
           </motion.a>
         </motion.div>
 
+        {/* Privacy Policy */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="pt-8 max-w-3xl mx-auto text-sm text-gray-500 leading-relaxed"
+        >
+          <p className="mb-2">
+            Squire uses Google OAuth to access your Gmail and Google Sheets only with your explicit permission.
+            We also integrate with GitHub, Slack, and other tools that you choose to connect.
+            We do not share your data with third parties.
+          </p>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

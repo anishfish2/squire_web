@@ -61,7 +61,7 @@ export default function TimeSave() {
   const fontScale = Math.max(32 - displayText.length * 0.8, 14)
 
   return (
-    <div className="w-full flex justify-center items-end pointer-events-none select-none text-center leading-none tracking-tighter">
+    <div className="w-full flex justify-center items-baseline pointer-events-none select-none text-center leading-none tracking-tighter">
       {/* Big time text */}
       <motion.span
         className={`font-extrabold ${
@@ -79,13 +79,14 @@ export default function TimeSave() {
         {displayText}
       </motion.span>
 
-      {/* “wasted” → “saved” transition */}
+      {/* Wasted / Saved */}
       <span
-        className="relative ml-3 font-extrabold"
+        className="relative ml-2 font-extrabold"
         style={{
-          fontSize: '1.8vw',
-          lineHeight: 1,
+          fontSize: '2.2vw', // slightly larger
+          lineHeight: 0.9, // tighter vertical alignment
           alignSelf: 'flex-end',
+          marginBottom: '1vw', // bring it closer to the time
           transition: 'all 0.5s ease-in-out',
         }}
       >
